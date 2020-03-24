@@ -9,13 +9,9 @@ using Toybox.ActivityMonitor;
 class HelloFenixView extends WatchUi.WatchFace {
 	
 	var timeview, dateview, stepsview, floorsview, batteryview;
-	var time_info, act_info, sys_info;
 
     function initialize() {
         WatchFace.initialize();
-        self.time_info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
-        self.act_info = ActivityMonitor.getInfo();
-        self.sys_info = System.getSystemStats();
     }
 
     // Load your resources here
@@ -37,6 +33,10 @@ class HelloFenixView extends WatchUi.WatchFace {
 
     // Update the view
     function onUpdate(dc) {
+        var time_info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
+        var act_info = ActivityMonitor.getInfo();
+        var sys_info = System.getSystemStats();
+
         var dateString = Lang.format("$3$,$1$ de $2$", [time_info.day, time_info.month, time_info.day_of_week]);
         var timeString = Lang.format("$1$:$2$", [time_info.hour.format("%02d"), time_info.min.format("%02d")]);
         var stepsString = Lang.format("$1$/$2$", [act_info.steps, act_info.stepGoal]);
