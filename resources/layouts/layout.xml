@@ -1,0 +1,14 @@
+<layout id="WatchFace">
+	<label id="TimeLabel" x="center" y="100" font="Graphics.FONT_NUMBER_HOT"
+		justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_BLUE" />
+	<label id="DateLabel" x="center" y="70" font="Graphics.FONT_SMALL"
+		justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_ORANGE" />
+
+	<label id="StepsLabel" x="center" y="180" font="Graphics.FONT_SMALL"
+		justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_YELLOW" />
+	<label id="FloorsLabel" x="center" y="200" font="Graphics.FONT_SMALL"
+		justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_GREEN" />
+
+	<label id="BatteryLabel" x="center" y="10" font="Graphics.FONT_NUMBER_MILD"
+		justification="Graphics.TEXT_JUSTIFY_CENTER" color="Graphics.COLOR_DK_GRAY" />
+</layout>
