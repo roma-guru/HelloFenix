@@ -5,66 +5,57 @@ using Toybox.Lang;
 using Toybox.Time.Gregorian;
 using Toybox.Time;
 using Toybox.ActivityMonitor;
+using Toybox.Math;
 
 class HelloFenixView extends WatchUi.WatchFace {
-	
-	var timeview, dateview, stepsview, floorsview, batteryview;
-
+    
     function initialize() {
         WatchFace.initialize();
     }
 
-    // Load your resources here
-    function onLayout(dc) {
-        setLayout(Rez.Layouts.WatchFace(dc));
-           
-        self.timeview = View.findDrawableById("TimeLabel");
-        self.dateview = View.findDrawableById("DateLabel");
-        self.stepsview = View.findDrawableById("StepsLabel");
-        self.floorsview = View.findDrawableById("FloorsLabel");
-        self.batteryview = View.findDrawableById("BatteryLabel"); 
-    }
-
-    // Called when this View is brought to the foreground. Restore
-    // the state of this View and prepare it to be shown. This includes
-    // loading resources into memory.
-    function onShow() {
-    }
-
     // Update the view
     function onUpdate(dc) {
+        View.onUpdate(dc);
         var time_info = Gregorian.info(Time.now(), Time.FORMAT_MEDIUM);
         var act_info = ActivityMonitor.getInfo();
+        var hrIterator = ActivityMonitor.getHeartRateHistory(3, false);
         var sys_info = System.getSystemStats();
 
-        var dateString = Lang.format("$3$,$1$ de $2$", [time_info.day, time_info.month, time_info.day_of_week]);
+        var dateString = Lang.format("$3$ $1$ $2$", [time_info.day, time_info.month, time_info.day_of_week]);
         var timeString = Lang.format("$1$:$2$", [time_info.hour.format("%02d"), time_info.min.format("%02d")]);
-        var stepsString = Lang.format("$1$/$2$", [act_info.steps, act_info.stepGoal]);
-        var floorsString = Lang.format("$1$/$2$", [act_info.floorsClimbed, act_info.floorsClimbedGoal]);
-        var batteryString = Lang.format("$1$%", [sys_info.battery.format("%02d")]);
-
-        dateview.setText(dateString);
-        timeview.setText(timeString);
-        stepsview.setText(stepsString);
-        floorsview.setText(floorsString);
-        batteryview.setText(batteryString);
-
-        // Call the parent onUpdate function to redraw the layout
-        View.onUpdate(dc);
+        var heartString = Lang.format("︎$1$bpm", [hrIterator.next().heartRate % 255]);
+        
+        var stepsAngle = 360.0 * act_info.steps/act_info.stepGoal;
+        var floorsAngle = 360.0 * act_info.floorsClimbed/act_info.floorsClimbedGoal;
+        var batteryAngle = 360.0 * sys_info.battery/100;
+        
+        // Display circles
+        var w = 5, n = 0.5;
+        var x_c = dc.getWidth()/2;
+        var y_c = dc.getHeight()/2;
+        var r = dc.getWidth()/2;
+        dc.setPenWidth(w);
+        
+        self.drawCircle(dc, x_c, y_c, r - n*w, Graphics.COLOR_DK_GRAY, batteryAngle);
+        n += 1.0;
+        self.drawCircle(dc, x_c, y_c, r - n*w, Graphics.COLOR_DK_GREEN, floorsAngle);
+        n += 1.0;
+        self.drawCircle(dc, x_c, y_c, r - n*w, Graphics.COLOR_YELLOW, stepsAngle);
+        
+        // Display datetime and heartbeat
+        dc.setColor(Graphics.COLOR_BLUE, Graphics.COLOR_BLACK);
+        dc.drawText(x_c, y_c, Graphics.FONT_NUMBER_HOT, timeString, Graphics.TEXT_JUSTIFY_CENTER | Graphics.TEXT_JUSTIFY_VCENTER);
+        dc.setColor(Graphics.COLOR_ORANGE, Graphics.COLOR_BLACK);
+        dc.drawText(x_c, y_c - r/2, Graphics.FONT_SMALL, dateString, Graphics.TEXT_JUSTIFY_CENTER);
+        dc.setColor(Graphics.COLOR_RED, Graphics.COLOR_BLACK);
+        dc.drawText(x_c, y_c + r/4, Graphics.FONT_XTINY, heartString, Graphics.TEXT_JUSTIFY_CENTER);
     }
-
-    // Called when this View is removed from the screen. Save the
-    // state of this View here. This includes freeing resources from
-    // memory.
-    function onHide() {
+    
+    private function drawCircle(dc, x_c, y_c, r, color, angle) {
+        if (angle > 0) {
+            dc.setColor(color, Graphics.COLOR_BLACK);
+            dc.drawArc(x_c, y_c, r, Graphics.ARC_COUNTER_CLOCKWISE, 90.0, 90.0+angle);
+        }
     }
-
-    // The user has just looked at their watch. Timers and animations may be started here.
-    function onExitSleep() {
-    }
-
-    // Terminate any active timers and prepare for slow updates.
-    function onEnterSleep() {
-    }
-
+    
 }
